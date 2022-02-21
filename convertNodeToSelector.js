@@ -73,34 +73,28 @@ function convertNodeToSelector( node ){
 	}
 
 	function findCommonParents(parent){
-		let nodes = []
 		let parents = []
-		let finalParents = []
-		let numberOfMatches = 0;
-		let desiredNumberOfMatches = 0;
+		let prevCheck = 0;
+		let check = 0;
 		while(parent != document){
-			let scan = scanNode( parent );
-			if(parents.length == 0){
-				nodes = [0, ...document.querySelectorAll( scan.selector )]
-			}
-			parents.push( scan )
-			numberOfMatches = nodes.reduce((p, c) => p + (parent.contains(c) ? 1 : 0));
-			let check = document.querySelectorAll(generateSelector( parents )).length;
-			if(check == numberOfMatches){
-				if(check == 1 && parents.length == 1){
-					return {path: [scan], target: scan, parents: [], numberOfNodes: 1}
+			parents.push( scanNode( parent ) )
+			check = document.querySelectorAll(generateSelector( parents )).length;
+			if(check == 1 || (prevCheck && check > prevCheck)){
+				if(prevCheck && check > prevCheck){
+					parents.pop()
 				}
-				if(!desiredNumberOfMatches){
-					desiredNumberOfMatches = numberOfMatches;
-				}
-				finalParents = [...parents]
+				let path = [...parents]
+				let target = path.shift();
+				return {path, target, parents, numberOfNodes: check}
 			}
+
+			prevCheck = check;
 			parent = parent.parentNode;
 		}
 
-		let path = [...finalParents]
-		let target = finalParents.shift();
-		return {path, target, parents: finalParents, numberOfNodes: desiredNumberOfMatches}
+		let path = [...parents]
+		let target = path.shift();
+		return {path, target, parents, numberOfNodes: check}
 	}
 
 	function findBestParentsCombination(commonParents){
