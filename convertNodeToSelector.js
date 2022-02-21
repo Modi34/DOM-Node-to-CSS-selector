@@ -84,7 +84,7 @@ function convertNodeToSelector( node ){
 					parents.pop()
 				}
 				let path = [...parents]
-				let target = path.shift();
+				let target = parents.shift();
 				return {path, target, parents, numberOfNodes: check}
 			}
 
@@ -93,7 +93,7 @@ function convertNodeToSelector( node ){
 		}
 
 		let path = [...parents]
-		let target = path.shift();
+		let target = parents.shift();
 		return {path, target, parents, numberOfNodes: check}
 	}
 
@@ -154,6 +154,5 @@ function convertNodeToSelector( node ){
 	// 
 	let commonParents = findCommonParents(node)
 	let parentsCombination = findBestParentsCombination( commonParents )
-
 	return generateSelector(optimizeSelector(parentsCombination, commonParents.numberOfNodes));
 }
