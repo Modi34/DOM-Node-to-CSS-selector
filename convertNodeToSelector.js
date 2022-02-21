@@ -76,25 +76,27 @@ function convertNodeToSelector( node ){
 		let parents = []
 		let prevCheck = 0;
 		let check = 0;
+		let significantParents = []
 		while(parent != document){
-			parents.push( scanNode( parent ) )
+			let scan = scanNode( parent );
+			parents.push( scan )
 			check = document.querySelectorAll(generateSelector( parents )).length;
-			if(check == 1 || (prevCheck && check > prevCheck)){
-				if(prevCheck && check > prevCheck){
-					parents.pop()
-				}
-				let path = [...parents]
-				let target = parents.shift();
-				return {path, target, parents, numberOfNodes: check}
+			if(check != prevCheck){
+				significantParents.push( scan )
+			}
+			if(check == 1){
+				let path = [...significantParents]
+				let target = significantParents.shift();
+				return {path, target, parents: significantParents, numberOfNodes: check}
 			}
 
 			prevCheck = check;
 			parent = parent.parentNode;
 		}
 
-		let path = [...parents]
-		let target = parents.shift();
-		return {path, target, parents, numberOfNodes: check}
+		let path = [...significantParents]
+		let target = significantParents.shift();
+		return {path, target, parents: significantParents, numberOfNodes: check}
 	}
 
 	function findBestParentsCombination(commonParents){
@@ -109,7 +111,7 @@ function convertNodeToSelector( node ){
 		let combo;
 		while(combo = combinations.pop()){
 			if(document.querySelectorAll( combo.selector ).length == commonParents.numberOfNodes){
-				return [commonParents.target, ...combo.parents]
+				return [...combo.parents, commonParents.target].reverse()
 			}
 		}
 	}
